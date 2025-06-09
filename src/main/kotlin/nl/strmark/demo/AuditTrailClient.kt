@@ -2,6 +2,7 @@ package nl.strmark.demo
 
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.client.JdkClientHttpRequestFactory
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter
 import org.springframework.http.converter.xml.MarshallingHttpMessageConverter
 import org.springframework.oxm.jaxb.Jaxb2Marshaller
 import org.springframework.stereotype.Component
@@ -10,13 +11,15 @@ import org.springframework.web.client.body
 import java.net.http.HttpClient
 import java.time.Duration
 
+
 @Component
 class AuditTrailClient(
     val restClientBuilder: RestClient.Builder
 ) {
     fun getUserid(url: String): String {
         val restClient = restClientBuilder
-            .messageConverters { converters -> converters.add(MarshallingHttpMessageConverter( jaxbMarshaller())) }
+            .messageConverters { converters -> converters.removeIf { converter -> converter is MappingJackson2XmlHttpMessageConverter } }
+            .messageConverters { converters -> converters.add(MarshallingHttpMessageConverter(jaxbMarshaller())) }
             .requestFactory(JdkClientHttpRequestFactory(createHttpClient()))
             .build()
 
